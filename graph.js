@@ -17,14 +17,19 @@ function makeDiag(error, nodes, links, table) {
         if (link.value) return true
     })
 
-    var scale = d3.scale.linear().domain([0,5]).range([20,0])
+    var scale = d3.scale.linear().domain([0,5]).range([300,0])
+    var linescale = d3.scale.pow().domain([0,5]).range([0,5])
 
     var edges = svg.selectAll("line")
                     .data(links)
                     .enter()
                     .append("line")
                     .style("stroke", "#ccc")
-                    .style("stroke-width", 1)
+                    .style("stroke-width", function(d) {
+                        return 1
+                        console.log(d.value,linescale(d.value))
+                        return linescale(d.value)
+                    })
 
     /* Establish the dynamic force behavor of the nodes */
     var force = d3.layout.force()
@@ -33,12 +38,11 @@ function makeDiag(error, nodes, links, table) {
                     .size([w,h])
                     .linkDistance(function(d) { 
                         if (d.value == 0) return null
-                        console.log('in',d.value,'out',scale(d.value))
                         return scale(d.value)
                     })
-                    .charge(-1400)
+                    .charge(-2000)
                     //.linkStrength(0.5)
-                    //.gravity(0.5)
+                    .gravity(1)
                     .start();
     /* Draw the edges/links between the nodes */
     var texts = svg.selectAll("text")
