@@ -7,8 +7,8 @@ var svg = d3.select("body")
                 .attr({ height: h, width: w })
 
 queue()
-    .defer(d3.json, "../data/parsed/nodes.json")
-    .defer(d3.json, "../data/parsed/links.json")
+    .defer(d3.json, "data/parsed/nodes.json")
+    .defer(d3.json, "data/parsed/links.json")
     .await(makeDiag);
 
 
