@@ -1,4 +1,4 @@
-var h = 500, w = 1000
+var h = 500, w = 500
 
 var color = d3.scale.category20()
 
@@ -20,11 +20,30 @@ queue()
     //else return party()
 
 function createParty(data, params, start) {
+    data.preservedLinks = data.links
     var start = start || _.last(params.partyStack)
     params.partyStack = params.partyStack || [start]
     var linked = _.where(data.links, { source: start }).concat(_.where(data.links, { target: start }))
+    
+    //for every linked person, give a score of links with existing party
+    var scored = linked.map(function(link, index) {
+        for (var i = 0; i < params.partyStack.length; i++) {
+            if (params.partyStack[i]===link.source || params.partyStack[i]===link.target) {
+                link.score = link.score ? link.score : 1
+            }
+        };
+        return link
+    })
+    //console.log('scored list',scored)
+    //if diversity = 1, reverse this list
+
     var pick = _.first(_.sortByOrder(linked, 'value', 'desc'))
     if ((params.partyStack.length > params.size) || !pick) {
+        if (!pick) {
+            console.log('ran out')
+        } else {
+            console.log('size reached',params.size)
+        }
         var names = params.partyStack.map(function(index) {
             return data.nodes[index].name
         })
@@ -53,7 +72,7 @@ function makeDiag(error, nodeData, links, table) {
 
     var linksCopy = _.cloneDeep(links)
 
-    var party = createParty({ links: links, nodes: nodeData },{ size: 5 },31)
+    var party = createParty({ links: links, nodes: nodeData },{ size: 10 },31)
     console.log(party)
 
 
@@ -110,7 +129,7 @@ function makeDiag(error, nodeData, links, table) {
                         if (d.selected) return 'black'
                     })
                     .on('click', function(d, i) {
-                        var party = createParty({ links: linksCopy, nodes: nodeData },{ size: 5 },i)
+                        var party = createParty({ links: linksCopy, nodes: nodeData },{ size: 10 },i)
                         console.log(party)
                         nodes.style('stroke', function(e,j) {
                             if (i===j) return 'black'
