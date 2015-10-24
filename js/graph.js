@@ -19,50 +19,35 @@ queue()
     //if party_stack > size, return party_stack
     //else return party()
 
-function createParty(data, params, start) {
-    data.preservedLinks = data.links
-    var start = start || _.last(params.partyStack)
-    params.partyStack = params.partyStack || [start]
-    var linked = _.where(data.links, { source: start }).concat(_.where(data.links, { target: start }))
-    
-    //for every linked person, give a score of links with existing party
-    var scored = linked.map(function(link, index) {
-        for (var i = 0; i < params.partyStack.length; i++) {
-            if (params.partyStack[i]===link.source || params.partyStack[i]===link.target) {
-                link.score = link.score ? link.score : 1
-            }
-        };
-        return link
+function mungeParty(data) {
+    data.nodes = data.nodes.map(function(node) {
+        node.links = {}
+        return node
     })
-    //console.log('scored list',scored)
-    //if diversity = 1, reverse this list
 
-    var pick = _.first(_.sortByOrder(linked, 'value', 'desc'))
-    if ((params.partyStack.length > params.size) || !pick) {
-        if (!pick) {
-            console.log('ran out')
-        } else {
-            console.log('size reached',params.size)
-        }
-        var names = params.partyStack.map(function(index) {
-            return data.nodes[index].name
-        })
-        return names
-    }
-    var used
-    if (pick.target===start) {
-        used = pick.source
-    } else {
-        used = pick.target
-    }
-    params.partyStack.push(used)
-    data.links = _.filter(data.links, function(link) {
-        var snippedStack = params.partyStack.slice(0,params.partyStack.length-1)
-        var remove = !((snippedStack.indexOf(link.source)<0) && (snippedStack.indexOf(link.target)<0))
-        return !remove
+    data.links = data.links.forEach(function(link) {
+        data.nodes[link.target].links[link.source] = { index: link.source, score: link.value }
+        data.nodes[link.source].links[link.target] = { index: link.target, score: link.value }
     })
-    console.log('filtered',data.links.length)
-    return createParty(data, params)
+
+    return data.nodes
+}
+
+function createParty(nodesInput, params) {
+    var nodes = _.cloneDeep(nodesInput)
+    var lastMember = _.last(params.partyStack)
+    var links = nodes[lastMember].links
+    var filteredLinks = _.filter(links, function(link) { if (params.partyStack.indexOf(link.index)<0) { return true } })
+    var sortedLinks = _.sortBy(filteredLinks, 'score').reverse() //sort node's links by score
+    params.partyStack.push(sortedLinks[0].index) //add that link
+
+    if (params.partyStack.length >= params.size) {
+        var namedParty = params.partyStack.map(function(index) {
+            return nodes[index].name
+        })
+        return namedParty
+    }
+    return createParty(nodes, params)
 }
 
 function makeDiag(error, nodeData, links, table) {
@@ -71,10 +56,9 @@ function makeDiag(error, nodeData, links, table) {
     })
 
     var linksCopy = _.cloneDeep(links)
+    var nodesCopy = _.cloneDeep(nodeData)
 
-    var party = createParty({ links: links, nodes: nodeData },{ size: 10 },31)
-    console.log(party)
-
+    var partyData = mungeParty({ nodes: nodesCopy, links: linksCopy })
 
     var scale = d3.scale.linear().domain([0,5]).range([300,0])
     var linescale = d3.scale.pow().domain([0,5]).range([0,5])
@@ -129,7 +113,7 @@ function makeDiag(error, nodeData, links, table) {
                         if (d.selected) return 'black'
                     })
                     .on('click', function(d, i) {
-                        var party = createParty({ links: linksCopy, nodes: nodeData },{ size: 10 },i)
+                        var party = createParty(partyData, { partyStack: [i], size: 5 })
                         console.log(party)
                         nodes.style('stroke', function(e,j) {
                             if (i===j) return 'black'
