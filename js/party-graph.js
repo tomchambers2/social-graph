@@ -2,7 +2,7 @@ var h = 500, w = 500
 
 var color = d3.scale.category20()
 
-var svg = d3.select("body")
+var svg = d3.select(".party")
                 .append("svg")
                 .attr({ height: h, width: w })
 
@@ -160,6 +160,9 @@ function makeDiag(nodeData, links, size, diversity) {
                     .on('click', function(d, i) {
                         var party = createParty(partyData, { partyStack: [i], size: size, diversity: diversity })
                         console.log(party.names)
+                        
+                        d3.select('.party-list').text(party.names.join(', '))
+
                         nodes.style('stroke', function(e,i) {
                             if (party.indices.indexOf(i)>-1) return 'black'
                         })

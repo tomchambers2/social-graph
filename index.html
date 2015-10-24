@@ -1,0 +1,44 @@
+<html>
+<head>
+	<link rel="stylesheet" href="styles/main.css">
+	<link href='https://fonts.googleapis.com/css?family=Press+Start+2P|Roboto+Slab' rel='stylesheet' type='text/css'>
+	<title>Party generator 2016</title>
+</head>
+<body>
+	<script
+	      type="text/javascript"
+	      src="js/d3.min.js">
+	</script>
+	<script
+	      type="text/javascript"
+	      src="js/queue.v1.min.js"> 
+	</script>
+	<script src="js/lodash.min.js"></script>
+	
+	<div class="title">Party Generator 2016</div>
+
+	<div class="main">
+		<p>The stupidest thing <a href="http://tomchambers.me" target="_blank">Tom Chambers</a> has ever made</p>
+		<p>If your life is anything like mine you're constantly struggling to prepare guest lists for all the mind-blowing parties you plan. So I've created this tool to assist in this burden. Provided you maintain a graph of your social network, it will allow you to automatically generate a list of people that know each other to invite. It walks the graph using a depth-first search and adds people to the party based on their relationship to their friends. If the current person's connections are already attending, the generator goes back one step.</p>
+
+		<b>Your party</b>: <span class="party-list"><i>Click person to generate list</i></span>
+
+		<div class="party"></div>
+
+		<table class="controls">
+		<tr>
+			<td>Size:</td><td><input type="range" name="size" id="size" value="5" min="0" max="20" /></td>
+		</tr>
+		<tr>
+			<td>Diversity:</td><td> <input type="range" name="size" id="diversity" value="1" min="0" max="100" /></td>
+		</tr>
+		</table>
+		<p><b>Click person again to regenerate based on parameter changes</b></p>		
+		<p>You can adjust the size and diversity parameters to generate a different kind of party. A low diversity score chooses connections that the current party members know well allowing for a comfortable and relaxed environment. A high diversity score adds connections that the party knows but not well, creating an environment where people can get to know new people.</p>
+
+		<p>Size is from 1 to 20. A party larger than 1 is advised. If you're planning a party larger than 20 please get in touch with your local authority to ensure you are in posession of appropriate permits.</p>
+	</div>
+
+	<script src="js/party-graph.js"> </script>
+</body>
+</html>
